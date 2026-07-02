@@ -265,7 +265,7 @@
     if (state.step === 2) {
       return state.firstName.trim() && state.lastName.trim() &&
              state.email.trim() && state.phone.trim() &&
-             state.address.trim() && state.city.trim() && state.zip.trim()
+             state.address.trim()
     }
     if (state.step === 3) return true
     return false
@@ -586,20 +586,6 @@
                 <div class="wiz-addr-suggestions" id="addrSuggestions"></div>
               </div>
             </div>
-            <div class="wiz-fields-row wiz-fields-3">
-              <div class="wiz-field">
-                <label>City</label>
-                <input type="text" id="wfCity" placeholder="Phoenix" value="${escHtml(state.city)}" autocomplete="address-level2">
-              </div>
-              <div class="wiz-field">
-                <label>State</label>
-                <input type="text" id="wfState" placeholder="AZ" value="AZ" readonly style="opacity:0.5;cursor:default;">
-              </div>
-              <div class="wiz-field">
-                <label>ZIP Code</label>
-                <input type="text" id="wfZip" placeholder="85001" value="${escHtml(state.zip)}" autocomplete="postal-code" maxlength="5">
-              </div>
-            </div>
             <div class="wiz-fields-row">
               <div class="wiz-field">
                 <label>Unit / Apt # <span class="wiz-optional">(optional)</span></label>
@@ -651,7 +637,6 @@
     }
     bind('wfFirst', 'firstName'); bind('wfLast', 'lastName')
     bind('wfEmail', 'email')
-    bind('wfCity',  'city');      bind('wfZip',   'zip')
     bind('wfUnit',  'unit')
 
     const phoneEl = document.getElementById('wfPhone')
@@ -792,7 +777,7 @@
     const vehicle = carEl?.value || ''
 
     const fullName = `${state.firstName} ${state.lastName}`.trim()
-    const fullAddr = [state.address, state.unit, `${state.city}, AZ ${state.zip}`].filter(Boolean).join(', ')
+    const fullAddr = [state.address, state.unit].filter(Boolean).join(', ')
 
     // Convert time to 24h HH:MM for Supabase time_slot
     const _tm = state.selectedTime ? state.selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i) : null
