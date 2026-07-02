@@ -898,9 +898,23 @@
       }),
       keepalive: true,
     }).catch(() => {})
+
+    // Owner notification
+    fetch('/.netlify/functions/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email:   'arizonamobilecardetailing@gmail.com',
+        name:    'Desert Bloom Admin',
+        subject: `New Booking - ${b.customer_name} | ${b.service_name} | ${formatDate(b.date)} at ${displayTime || b.time_slot}`,
+        htmlContent: `<!DOCTYPE html><html><body style="font-family:Arial,sans-serif;background:#f5f5f5;padding:20px;"><div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;padding:32px;border:1px solid #ddd;"><h2 style="color:#C8714A;margin:0 0 24px;">New Booking - Desert Bloom Mobile Car Detailing</h2><table style="width:100%;border-collapse:collapse;"><tr><td style="padding:8px 0;color:#666;width:40%;">Name</td><td style="padding:8px 0;font-weight:600;">${escHtml(b.customer_name)}</td></tr><tr><td style="padding:8px 0;color:#666;">Phone</td><td style="padding:8px 0;font-weight:600;">${escHtml(b.customer_phone)}</td></tr><tr><td style="padding:8px 0;color:#666;">Email</td><td style="padding:8px 0;font-weight:600;">${escHtml(b.customer_email)}</td></tr><tr><td style="padding:8px 0;color:#666;">Service</td><td style="padding:8px 0;font-weight:600;">${escHtml(b.service_name)} — $${b.service_price}</td></tr><tr><td style="padding:8px 0;color:#666;">Vehicle</td><td style="padding:8px 0;font-weight:600;">${escHtml(b.vehicle_make || 'Not specified')}</td></tr><tr><td style="padding:8px 0;color:#666;">Add-Ons</td><td style="padding:8px 0;font-weight:600;">${b.addons && b.addons.length ? b.addons.map(a => escHtml(a.name) + (a.qty > 1 ? ' \xD7' + a.qty : '')).join(', ') : 'None'}</td></tr><tr><td style="padding:8px 0;color:#666;">Date &amp; Time</td><td style="padding:8px 0;font-weight:600;">${formatDate(b.date)} at ${escHtml(displayTime || b.time_slot)}</td></tr><tr><td style="padding:8px 0;color:#666;">Address</td><td style="padding:8px 0;font-weight:600;">${escHtml(b.service_address)}</td></tr><tr><td style="padding:8px 0;color:#666;">Notes</td><td style="padding:8px 0;font-weight:600;">${escHtml(b.notes || 'None')}</td></tr><tr><td style="padding:8px 0;color:#666;">Water Access</td><td style="padding:8px 0;font-weight:600;">${b.has_water_access === true ? 'Yes' : b.has_water_access === false ? 'No' : 'Not answered'}</td></tr><tr><td style="padding:8px 0;color:#666;">Power Access</td><td style="padding:8px 0;font-weight:600;">${b.has_power_access === true ? 'Yes' : b.has_power_access === false ? 'No' : 'Not answered'}</td></tr><tr style="border-top:2px solid #C8714A;"><td style="padding:12px 0;color:#666;">Total</td><td style="padding:12px 0;font-weight:700;color:#C8714A;font-size:18px;">$${b.total}</td></tr></table></div></body></html>`,
+      }),
+      keepalive: true,
+    }).catch(() => {})
   }
 
   function showSuccess() {
+    try { localStorage.removeItem(LS_KEY) } catch {}
     const body = document.getElementById('wizBody')
     const footer = document.querySelector('.wiz-footer')
     if (footer) footer.style.display = 'none'

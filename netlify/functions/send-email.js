@@ -27,7 +27,7 @@ exports.handler = async (event) => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      sender: { name: 'Desert Bloom Mobile Car Detailing', email: 'desertbloommobilecardetailing@gmail.com' },
+      sender: { name: 'Desert Bloom Mobile Car Detailing', email: 'arizonamobilecardetailing@gmail.com' },
       to: [{ email, name }],
       subject: subject || 'Your Booking is Confirmed - Desert Bloom Mobile Car Detailing',
       htmlContent,
