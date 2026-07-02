@@ -773,28 +773,41 @@
     const btn = document.getElementById('wizNext')
     if (btn) { btn.disabled = true; btn.textContent = 'Booking…' }
 
-    const pkg  = packages.find(p => p.id === state.selectedPkg)
-    const size = vehicleSizes.find(v => v.id === state.selectedSize)
+    const pkg    = packages.find(p => p.id === state.selectedPkg)
     const addons = ADDONS.filter(a => state.selectedAddons[a.id])
-    const carEl   = document.getElementById('wfCar')
+    const carEl  = document.getElementById('wfCar')
     const vehicle = carEl?.value || ''
 
+    const fullName = `${state.firstName} ${state.lastName}`.trim()
+    const fullAddr = `${state.address}, ${state.city}, AZ ${state.zip}`
+
+    // Convert time to 24h HH:MM for Supabase time_slot
+    const _tm = state.selectedTime ? state.selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i) : null
+    let _h = _tm ? parseInt(_tm[1]) : 9, _m = _tm ? parseInt(_tm[2]) : 0, _ap = _tm ? _tm[3].toUpperCase() : 'AM'
+    if (_ap === 'PM' && _h !== 12) _h += 12
+    if (_ap === 'AM' && _h === 12) _h = 0
+    const _slot = `${String(_h).padStart(2,'0')}:${String(_m).padStart(2,'0')}`
+
+    // Build addons array matching admin portal schema
+    const _addons = addons.map(a => ({ name: a.name, price: a.price, qty: a.qty ? (state.childSeatQty || 1) : 1 }))
+    if (state.selectedSize === 'large') _addons.unshift({ name: 'Oversized Vehicle / 3rd Row Fee', price: 50, qty: 1 })
+
     const bookingData = {
-      business_id:    BUSINESS_ID,
-      first_name:     state.firstName,
-      last_name:      state.lastName,
-      email:          state.email,
-      phone:          state.phone,
-      address:        `${state.address}, ${state.city}, AZ ${state.zip}`,
-      package_name:   pkg?.name || '',
-      package_price:  pkg?.price || 0,
-      vehicle_size:   size?.name || '',
-      addons:         addons.map(a => a.name).join(', '),
-      total:          getTotal(),
-      booking_date:   state.selectedDate,
-      booking_time:   state.selectedTime,
-      notes:            vehicle ? `Vehicle: ${vehicle}. ${state.notes}`.trim() : state.notes,
+      business_id:      BUSINESS_ID,
+      customer_name:    fullName,
+      customer_email:   state.email,
+      customer_phone:   state.phone,
+      vehicle_make:     vehicle,
+      service_address:  fullAddr,
+      service_name:     pkg?.name || 'Unknown',
+      service_price:    pkg?.price || 0,
+      addons:           _addons,
+      total:            getTotal(),
+      notes:            state.notes || null,
+      date:             state.selectedDate,
+      time_slot:        _slot,
       status:           'pending',
+      payment_status:   'not_paid',
       has_water_access: state.hasWater,
       has_power_access: state.hasPower,
     }
@@ -818,14 +831,14 @@
       keepalive: true,
     }).catch(() => {})
 
-    sendConfirmationEmail(bookingData)
-
+    sendConfirmationEmail(bookingData, state.selectedTime)
     showSuccess()
   }
 
-  async function sendConfirmationEmail(b) {
-    const addonLines = b.addons
-      ? b.addons.split(', ').map(a => `<li style="padding:4px 0;color:#C0B09A;">+ ${a}</li>`).join('')
+  async function sendConfirmationEmail(b, displayTime) {
+    const firstName   = (b.customer_name || '').split(' ')[0]
+    const addonLines  = b.addons && b.addons.length
+      ? b.addons.map(a => `<li style="padding:4px 0;color:#C0B09A;">+ ${escHtml(a.name)}${a.qty > 1 ? ` ×${a.qty}` : ''}</li>`).join('')
       : ''
 
     const html = `<!DOCTYPE html>
@@ -840,18 +853,18 @@
   </td></tr>
   <tr><td style="padding:40px;">
     <p style="color:#C8714A;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin:0 0 12px;">Booking Confirmed</p>
-    <h1 style="color:#ffffff;font-size:28px;font-weight:700;margin:0 0 16px;line-height:1.3;">Hi ${escHtml(b.first_name)}, you're all set! 🌸</h1>
-    <p style="color:#C0B09A;font-size:15px;line-height:1.7;margin:0 0 32px;">We've received your booking and will text you at <strong style="color:#fff;">${escHtml(b.phone)}</strong> within 1 business hour to confirm your appointment.</p>
+    <h1 style="color:#ffffff;font-size:28px;font-weight:700;margin:0 0 16px;line-height:1.3;">Hi ${escHtml(firstName)}, you're all set!</h1>
+    <p style="color:#C0B09A;font-size:15px;line-height:1.7;margin:0 0 32px;">We've received your booking and will text you at <strong style="color:#fff;">${escHtml(b.customer_phone)}</strong> within 1 business hour to confirm your appointment.</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#0F0A07;border-radius:8px;border:1px solid #3A2A18;margin-bottom:24px;">
       <tr><td style="padding:24px;">
         <p style="color:#C8714A;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin:0 0 16px;">Booking Details</p>
         <table width="100%" cellpadding="0" cellspacing="0">
-          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;width:40%;">Package</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.package_name)}</td></tr>
-          ${b.vehicle_size !== 'Sedan / Coupe' ? `<tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Vehicle Size</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.vehicle_size)}</td></tr>` : ''}
-          ${b.addons ? `<tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;vertical-align:top;">Add-Ons</td><td style="color:#ffffff;font-size:13px;padding:6px 0;"><ul style="margin:0;padding-left:16px;">${addonLines}</ul></td></tr>` : ''}
-          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Date</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${formatDate(b.booking_date)}</td></tr>
-          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Time</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.booking_time)}</td></tr>
-          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Location</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.address)}</td></tr>
+          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;width:40%;">Package</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.service_name)}</td></tr>
+          ${b.vehicle_make ? `<tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Vehicle</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.vehicle_make)}</td></tr>` : ''}
+          ${addonLines ? `<tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;vertical-align:top;">Add-Ons</td><td style="color:#ffffff;font-size:13px;padding:6px 0;"><ul style="margin:0;padding-left:16px;">${addonLines}</ul></td></tr>` : ''}
+          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Date</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${formatDate(b.date)}</td></tr>
+          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Time</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(displayTime || b.time_slot)}</td></tr>
+          <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Location</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.service_address)}</td></tr>
           ${b.notes ? `<tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;vertical-align:top;">Notes</td><td style="color:#C0B09A;font-size:13px;padding:6px 0;">${escHtml(b.notes)}</td></tr>` : ''}
         </table>
         <div style="border-top:1px solid #3A2A18;margin-top:16px;padding-top:16px;display:flex;justify-content:space-between;">
@@ -880,9 +893,9 @@
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        email: b.email,
-        name:  `${b.first_name} ${b.last_name}`,
-        subject: `Your Booking is Confirmed - ${COMPANY}`,
+        email:       b.customer_email,
+        name:        b.customer_name,
+        subject:     `Your Booking is Confirmed - ${COMPANY}`,
         htmlContent: html,
       }),
       keepalive: true,
