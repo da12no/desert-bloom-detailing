@@ -847,7 +847,7 @@
 <tr><td align="center">
 <table width="600" cellpadding="0" cellspacing="0" style="background:#1A1108;border-radius:12px;overflow:hidden;border:1px solid #3A2A18;max-width:100%;">
   <tr><td style="background:#211508;padding:32px 40px;text-align:center;border-bottom:1px solid #3A2A18;">
-    <img src="https://${DOMAIN}/logo.png" alt="${COMPANY}" style="height:60px;width:auto;">
+    <img src="https://${DOMAIN}/logo.png" alt="${COMPANY}" style="height:120px;width:auto;max-width:200px;">
   </td></tr>
   <tr><td style="padding:40px;">
     <p style="color:#C8714A;font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin:0 0 12px;">Booking Confirmed</p>
@@ -865,10 +865,12 @@
           <tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;">Location</td><td style="color:#ffffff;font-size:13px;font-weight:600;padding:6px 0;">${escHtml(b.service_address)}</td></tr>
           ${b.notes ? `<tr><td style="color:#8A7A6A;font-size:13px;padding:6px 0;vertical-align:top;">Notes</td><td style="color:#C0B09A;font-size:13px;padding:6px 0;">${escHtml(b.notes)}</td></tr>` : ''}
         </table>
-        <div style="border-top:1px solid #3A2A18;margin-top:16px;padding-top:16px;display:flex;justify-content:space-between;">
-          <span style="color:#8A7A6A;font-size:13px;">Total Due at Service</span>
-          <span style="color:#C8714A;font-size:22px;font-weight:700;">$${b.total}</span>
-        </div>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #3A2A18;margin-top:16px;">
+          <tr>
+            <td style="padding-top:16px;color:#8A7A6A;font-size:13px;">Total Due at Service</td>
+            <td style="padding-top:16px;color:#C8714A;font-size:22px;font-weight:700;text-align:right;">$${b.total}</td>
+          </tr>
+        </table>
       </td></tr>
     </table>
     <p style="color:#8A7A6A;font-size:13px;line-height:1.7;margin:0 0 24px;">No payment is needed right now. We'll reach out to confirm and answer any questions before we arrive.</p>
