@@ -186,6 +186,7 @@
   state.city          = state.city          || ''
   state.zip           = state.zip           || ''
   state.notes         = state.notes         || ''
+  state.unit          = state.unit          || ''
   state.bookedSlots   = state.bookedSlots   || {}
   state.hasWater      = null
   state.hasPower      = null
@@ -510,9 +511,10 @@
     let [h, m] = timePart.split(':').map(Number)
     if (ampm === 'PM' && h !== 12) h += 12
     if (ampm === 'AM' && h === 12) h = 0
-    const slotMs = h * 60 + m
-    const nowMs  = today.getHours() * 60 + today.getMinutes()
-    return slotMs <= nowMs
+    const slotMs   = h * 60 + m
+    const nowAZ    = new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Phoenix' }))
+    const cutoffMs = nowAZ.getHours() * 60 + nowAZ.getMinutes() + 120
+    return slotMs < cutoffMs
   }
 
   function formatDate(str) {
@@ -598,20 +600,28 @@
                 <input type="text" id="wfZip" placeholder="85001" value="${escHtml(state.zip)}" autocomplete="postal-code" maxlength="5">
               </div>
             </div>
+            <div class="wiz-fields-row">
+              <div class="wiz-field">
+                <label>Unit / Apt # <span class="wiz-optional">(optional)</span></label>
+                <input type="text" id="wfUnit" placeholder="Apt 4B, Unit 200, Suite 100..." value="${escHtml(state.unit)}">
+              </div>
+            </div>
+            <div class="wiz-fields-row">
+              <div class="wiz-field">
+                <label>Notes <span class="wiz-optional">(optional)</span></label>
+                <input type="text" id="wfNotes" placeholder="Pet hair, gate codes, parking notes..." value="${escHtml(state.notes)}">
+              </div>
+            </div>
           </div>
         </div>
         <div class="wiz-details-group">
           <div class="wiz-details-num">3</div>
           <div>
-            <div class="wiz-details-title">Vehicle &amp; Notes <span class="wiz-optional">(optional)</span></div>
+            <div class="wiz-details-title">Your Vehicle <span class="wiz-optional">(optional)</span></div>
             <div class="wiz-fields-row">
               <div class="wiz-field">
-                <label>Vehicle Make / Model</label>
-                <input type="text" id="wfCar" placeholder="e.g. 2022 Toyota Camry" value="${escHtml(state.notes ? '' : '')}">
-              </div>
-              <div class="wiz-field">
-                <label>Special Requests <span class="wiz-optional">optional</span></label>
-                <input type="text" id="wfNotes" placeholder="Anything we should know?" value="${escHtml(state.notes)}">
+                <label>Year, Make &amp; Model</label>
+                <input type="text" id="wfCar" placeholder="e.g. 2022 Toyota Camry">
               </div>
             </div>
           </div>
@@ -642,6 +652,7 @@
     bind('wfFirst', 'firstName'); bind('wfLast', 'lastName')
     bind('wfEmail', 'email')
     bind('wfCity',  'city');      bind('wfZip',   'zip')
+    bind('wfUnit',  'unit')
 
     const phoneEl = document.getElementById('wfPhone')
     if (phoneEl) {
@@ -694,24 +705,26 @@
       if (q.length < 3) { sugg.style.display = 'none'; return }
       debounce = setTimeout(async () => {
         try {
-          const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q + ' Arizona')}&limit=5&lang=en`
+          const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=5&lat=33.4484&lon=-112.0740&lang=en`
           const res = await fetch(url)
           const data = await res.json()
-          const features = data.features || []
-          if (!features.length) { sugg.style.display = 'none'; return }
+          const items = (data.features || []).filter(f => f.properties.country === 'United States')
+          if (!items.length) { sugg.style.display = 'none'; return }
           sugg.innerHTML = ''
-          features.forEach(f => {
+          items.forEach(f => {
             const p = f.properties
-            const label = [p.name, p.street, p.city, p.state].filter(Boolean).join(', ')
+            const line1 = [p.housenumber, p.street].filter(Boolean).join(' ')
+            const line2 = [p.city, p.state, p.postcode].filter(Boolean).join(', ')
+            const full  = [line1, line2].filter(Boolean).join(', ')
             const opt = document.createElement('div')
             opt.className = 'wiz-addr-option'
-            opt.textContent = label
+            opt.textContent = full
             opt.addEventListener('mousedown', e => {
               e.preventDefault()
-              input.value = label
-              state.address = label
-              if (p.city)  { state.city = p.city; const c = document.getElementById('wfCity'); if (c) c.value = p.city }
-              if (p.postcode) { state.zip = p.postcode; const z = document.getElementById('wfZip'); if (z) z.value = p.postcode }
+              input.value = full
+              state.address = full
+              if (p.city)     { state.city = p.city;     const c = document.getElementById('wfCity'); if (c) c.value = p.city }
+              if (p.postcode) { state.zip  = p.postcode; const z = document.getElementById('wfZip');  if (z) z.value = p.postcode }
               saveState(); updateNextBtn()
               sugg.style.display = 'none'
             })
@@ -779,7 +792,7 @@
     const vehicle = carEl?.value || ''
 
     const fullName = `${state.firstName} ${state.lastName}`.trim()
-    const fullAddr = `${state.address}, ${state.city}, AZ ${state.zip}`
+    const fullAddr = [state.address, state.unit, `${state.city}, AZ ${state.zip}`].filter(Boolean).join(', ')
 
     // Convert time to 24h HH:MM for Supabase time_slot
     const _tm = state.selectedTime ? state.selectedTime.match(/(\d+):(\d+)\s*(AM|PM)/i) : null
