@@ -12,7 +12,7 @@
 
   const SUPABASE_URL = 'https://wjtjsfopysjtpkooxyje.supabase.co'
   const SUPABASE_KEY = 'sb_publishable_KTN_kS0acmCrDHKd0PV87g_OgYKL15s'
-  const BUSINESS_ID  = 'DESERT_BLOOM_BUSINESS_ID_HERE'
+  const BUSINESS_ID  = '407b8441-e298-47ea-80b1-b483b11d9b98'
 
   /* ===== FOOTER YEAR ===== */
   const fyEl = document.getElementById('footerYear')
