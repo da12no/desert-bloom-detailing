@@ -5,8 +5,8 @@
   const COMPANY    = 'Desert Bloom Mobile Car Detailing'
   const PHONE      = '4804050272'
   const PHONE_DISP = '(480) 405-0272'
-  const EMAIL_TO   = 'hello@desertbloommobilecardetailing.com'
-  const DOMAIN     = 'desertbloommobilecardetailing.com'
+  const EMAIL_TO   = 'hello@desertbloommobilecardetailing.shop'
+  const DOMAIN     = 'desertbloommobilecardetailing.shop'
   const LS_KEY     = 'desert_bloom_booking'
   const GOLD       = '#C8714A'
 
