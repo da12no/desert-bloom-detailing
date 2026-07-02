@@ -187,6 +187,8 @@
   state.zip           = state.zip           || ''
   state.notes         = state.notes         || ''
   state.bookedSlots   = state.bookedSlots   || {}
+  state.hasWater      = null
+  state.hasPower      = null
 
   function saveState() {
     try { localStorage.setItem(LS_KEY, JSON.stringify(state)) } catch {}
@@ -522,6 +524,20 @@
     return `${days[dt.getDay()]}, ${months[m - 1]} ${d}, ${y}`
   }
 
+  function accessBtns(field, current) {
+    return [
+      { val: 'true', label: 'Yes' },
+      { val: 'false', label: 'No' },
+    ].map(({ val, label }) => {
+      const active = (current === true && val === 'true') || (current === false && val === 'false')
+      const border = active ? '#C8714A' : '#3A2A18'
+      const bg     = active ? '#C8714A' : '#1A1108'
+      const color  = active ? '#ffffff' : '#8A8070'
+      const weight = active ? '700' : '500'
+      return `<button type="button" class="wiz-access-btn" data-field="${field}" data-val="${val}" style="flex:1;padding:10px 6px;border-radius:10px;border:1.5px solid ${border};background:${bg};color:${color};font-size:13px;font-weight:${weight};cursor:pointer;transition:all 0.15s;">${label}</button>`
+    }).join('')
+  }
+
   /* ===== STEP 2: Details ===== */
   function renderStep2(body) {
     body.innerHTML = `
@@ -584,7 +600,7 @@
             </div>
           </div>
         </div>
-        <div class="wiz-details-group" style="border-bottom:none;">
+        <div class="wiz-details-group">
           <div class="wiz-details-num">3</div>
           <div>
             <div class="wiz-details-title">Vehicle &amp; Notes <span class="wiz-optional">(optional)</span></div>
@@ -600,6 +616,23 @@
             </div>
           </div>
         </div>
+        <div class="wiz-details-group" style="border-bottom:none;">
+          <div class="wiz-details-num">4</div>
+          <div>
+            <div class="wiz-details-title">Property Access</div>
+            <p style="font-size:13px;color:#8A7A6A;margin:2px 0 16px;">Helps our tech prepare — not always required, just good to know.</p>
+            <div class="wiz-fields-row">
+              <div class="wiz-field">
+                <label>Water access on site?</label>
+                <div style="display:flex;gap:8px;margin-top:10px;">${accessBtns('water', state.hasWater)}</div>
+              </div>
+              <div class="wiz-field">
+                <label>Power / electricity on site?</label>
+                <div style="display:flex;gap:8px;margin-top:10px;">${accessBtns('power', state.hasPower)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </form>`
 
     const bind = (id, key) => {
@@ -607,8 +640,21 @@
       if (el) el.addEventListener('input', () => { state[key] = el.value; saveState(); updateNextBtn() })
     }
     bind('wfFirst', 'firstName'); bind('wfLast', 'lastName')
-    bind('wfEmail', 'email');     bind('wfPhone', 'phone')
+    bind('wfEmail', 'email')
     bind('wfCity',  'city');      bind('wfZip',   'zip')
+
+    const phoneEl = document.getElementById('wfPhone')
+    if (phoneEl) {
+      phoneEl.addEventListener('input', function () {
+        const digits = this.value.replace(/\D/g, '').slice(0, 10)
+        if (digits.length <= 3)      this.value = digits
+        else if (digits.length <= 6) this.value = `(${digits.slice(0,3)}) ${digits.slice(3)}`
+        else                         this.value = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`
+        state.phone = this.value
+        saveState()
+        updateNextBtn()
+      })
+    }
 
     const carEl   = document.getElementById('wfCar')
     const notesEl = document.getElementById('wfNotes')
@@ -616,6 +662,24 @@
     if (notesEl) notesEl.addEventListener('input', () => { state.notes = notesEl.value; saveState() })
 
     initAddrAutocomplete()
+
+    document.querySelectorAll('.wiz-access-btn').forEach(btn => {
+      btn.addEventListener('click', function () {
+        const field  = this.dataset.field
+        const rawVal = this.dataset.val
+        const val    = rawVal === 'true' ? true : rawVal === 'false' ? false : null
+        if (field === 'water') state.hasWater = val
+        else                   state.hasPower = val
+        document.querySelectorAll(`.wiz-access-btn[data-field="${field}"]`).forEach(b => {
+          const active = b.dataset.val === rawVal
+          b.style.borderColor = active ? '#C8714A' : '#3A2A18'
+          b.style.background  = active ? '#C8714A' : '#1A1108'
+          b.style.color       = active ? '#ffffff' : '#8A8070'
+          b.style.fontWeight  = active ? '700'     : '500'
+        })
+        saveState()
+      })
+    })
   }
 
   function initAddrAutocomplete() {
@@ -729,8 +793,10 @@
       total:          getTotal(),
       booking_date:   state.selectedDate,
       booking_time:   state.selectedTime,
-      notes:          vehicle ? `Vehicle: ${vehicle}. ${state.notes}`.trim() : state.notes,
-      status:         'pending',
+      notes:            vehicle ? `Vehicle: ${vehicle}. ${state.notes}`.trim() : state.notes,
+      status:           'pending',
+      has_water_access: state.hasWater,
+      has_power_access: state.hasPower,
     }
 
     try {
