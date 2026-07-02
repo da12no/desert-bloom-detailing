@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Confirmed | Desert Bloom Mobile Car Detailing</title>
+  <meta name="robots" content="noindex">
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:   #0F0A07;
+      --dark:    #1A1108;
+      --gold:    #C8714A;
+      --gold-lt: #D98B6A;
+      --white:   #ffffff;
+      --gray:    #8A7A6A;
+      --lt-gray: #C0B09A;
+      --border:  #3A2A18;
+      --serif:   'Playfair Display', serif;
+      --sans:    'Inter', sans-serif;
+    }
+    html { scroll-behavior: smooth; }
+    body { background: var(--black); color: var(--white); font-family: var(--sans); line-height: 1.6; min-height: 100vh; display: flex; flex-direction: column; }
+    nav { background: rgba(15,10,7,0.95); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; }
+    .logo-img { height: 44px; width: auto; }
+    .nav-home { color: var(--lt-gray); text-decoration: none; font-size: 13px; font-weight: 500; transition: color 0.2s; }
+    .nav-home:hover { color: var(--gold); }
+    main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 60px 24px; }
+    .ty-wrap { width: 100%; max-width: 560px; text-align: center; }
+    @keyframes checkDraw { from { stroke-dashoffset: 60; opacity: 0; } to { stroke-dashoffset: 0; opacity: 1; } }
+    @keyframes ringScale { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    .ty-icon { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--gold); background: rgba(200,113,74,0.08); display: flex; align-items: center; justify-content: center; margin: 0 auto 28px; animation: ringScale 0.5s ease 0.1s both; }
+    .ty-icon svg { width: 32px; height: 32px; stroke: var(--gold); stroke-width: 2.5; fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 60; stroke-dashoffset: 0; animation: checkDraw 0.5s ease 0.4s both; }
+    .ty-tag { color: var(--gold); font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; animation: fadeUp 0.6s ease 0.3s both; }
+    .ty-heading { font-family: var(--serif); font-size: 42px; font-weight: 700; line-height: 1.15; margin-bottom: 14px; animation: fadeUp 0.6s ease 0.45s both; }
+    .ty-heading em { color: var(--gold); font-style: italic; }
+    .ty-sub { color: var(--lt-gray); font-size: 16px; line-height: 1.7; margin-bottom: 36px; animation: fadeUp 0.6s ease 0.55s both; }
+    .ty-note { color: var(--gray); font-size: 13px; line-height: 1.6; margin-bottom: 32px; animation: fadeUp 0.6s ease 0.75s both; }
+    .ty-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; animation: fadeUp 0.6s ease 0.85s both; }
+    .btn-gold { display: inline-block; background: var(--gold); color: var(--white); padding: 14px 32px; border-radius: 6px; font-weight: 700; font-family: var(--sans); font-size: 15px; text-decoration: none; border: none; cursor: pointer; transition: background 0.2s, box-shadow 0.2s, transform 0.15s; }
+    .btn-gold:hover { background: var(--gold-lt); box-shadow: 0 4px 24px rgba(200,113,74,0.35); transform: translateY(-1px); }
+    .btn-outline { display: inline-block; border: 2px solid var(--border); color: var(--lt-gray); padding: 12px 32px; border-radius: 6px; font-weight: 600; font-size: 15px; text-decoration: none; transition: border-color 0.2s, color 0.2s; }
+    .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+    footer { background: #0A0703; border-top: 1px solid var(--border); padding: 24px; text-align: center; }
+    footer p { color: var(--gray); font-size: 12px; line-height: 1.8; }
+    footer a { color: var(--gray); text-decoration: none; transition: color 0.2s; }
+    footer a:hover { color: var(--gold); }
+    @media (max-width: 480px) { .ty-heading { font-size: 30px; } .ty-actions { flex-direction: column; } .btn-gold, .btn-outline { text-align: center; } }
+  </style>
+</head>
+<body>
+  <nav>
+    <img src="logo.png" alt="Desert Bloom Mobile Car Detailing" class="logo-img">
+    <a href="index.html" class="nav-home">← Back to Home</a>
+  </nav>
+  <main>
+    <div class="ty-wrap">
+      <div class="ty-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <p class="ty-tag">Booking Confirmed</p>
+      <h1 class="ty-heading">We appreciate <em>you.</em></h1>
+      <p class="ty-sub" id="tyGreeting">Your booking is all set. We'll text you within 1 business hour to confirm everything.</p>
+      <p class="ty-note">No payment is required right now. We'll reach out to confirm your appointment and answer any questions before your detail.</p>
+      <div class="ty-actions">
+        <a href="tel:4804050272" class="btn-gold">Call (480) 405-0272</a>
+        <a href="index.html" class="btn-outline">Back to Home</a>
+      </div>
+    </div>
+  </main>
+  <footer>
+    <p>&copy; <span id="yr"></span> Desert Bloom Mobile Car Detailing &nbsp;|&nbsp; Phoenix Metro Area, AZ</p>
+    <p><a href="tel:4804050272">(480) 405-0272</a> &nbsp;|&nbsp; <a href="mailto:hello@desertbloommobilecardetailing.com">hello@desertbloommobilecardetailing.com</a></p>
+  </footer>
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+    localStorage.removeItem('desert_bloom_booking');
+  </script>
+</body>
+</html>
