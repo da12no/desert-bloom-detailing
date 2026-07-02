@@ -148,7 +148,7 @@ section { padding: 88px 0; }
   padding: 22px 24px;
   display: flex; justify-content: center; gap: 56px; flex-wrap: wrap;
 }
-.stat { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: var(--lt-gray); }
+.stat { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 500; color: var(--lt-gray); white-space: nowrap; }
 
 /* ===== PACKAGES ===== */
 #services { background: var(--black); }
@@ -621,6 +621,7 @@ footer { background: #0A0703; border-top: 1px solid var(--border); padding: 64px
   .footer-grid { grid-template-columns: 1fr; gap: 28px; }
   footer { padding: 48px 0 0; }
   .btn-gold, .btn-outline { display: block; text-align: center; width: 100%; }
-  .stats-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .stats-bar { display: flex; flex-wrap: nowrap; justify-content: space-around; padding: 14px 4px; gap: 0; }
+  .stat { font-size: 11px; gap: 4px; }
   .wiz-vehicle-grid { grid-template-columns: 1fr; }
 }
