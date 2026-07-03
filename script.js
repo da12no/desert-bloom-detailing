@@ -185,6 +185,7 @@
   state.zip           = state.zip           || ''
   state.notes         = state.notes         || ''
   state.unit          = state.unit          || ''
+  state.vehicle       = state.vehicle       || ''
   state.bookedSlots   = state.bookedSlots   || {}
   state.hasWater      = null
   state.hasPower      = null
@@ -605,7 +606,7 @@
             <div class="wiz-fields-row">
               <div class="wiz-field">
                 <label>Year, Make &amp; Model</label>
-                <input type="text" id="wfCar" placeholder="e.g. 2022 Toyota Camry">
+                <input type="text" id="wfCar" placeholder="e.g. 2022 Toyota Camry" value="${escHtml(state.vehicle)}">
               </div>
             </div>
           </div>
@@ -652,7 +653,7 @@
 
     const carEl   = document.getElementById('wfCar')
     const notesEl = document.getElementById('wfNotes')
-    if (carEl)   carEl.addEventListener('input',   () => saveState())
+    if (carEl)   carEl.addEventListener('input',   () => { state.vehicle = carEl.value; saveState() })
     if (notesEl) notesEl.addEventListener('input', () => { state.notes = notesEl.value; saveState() })
 
     initAddrAutocomplete()
@@ -771,8 +772,7 @@
 
     const pkg    = packages.find(p => p.id === state.selectedPkg)
     const addons = ADDONS.filter(a => state.selectedAddons[a.id])
-    const carEl  = document.getElementById('wfCar')
-    const vehicle = carEl?.value || ''
+    const vehicle = state.vehicle || ''
 
     const fullName = `${state.firstName} ${state.lastName}`.trim()
     const fullAddr = [state.address, state.unit].filter(Boolean).join(', ')
