@@ -166,9 +166,7 @@
   ]
   const TIME_SLOTS = ['7:00 AM','8:00 AM','9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM','6:00 PM']
 
-  let state = (() => {
-    try { return JSON.parse(localStorage.getItem(LS_KEY)) || {} } catch { return {} }
-  })()
+  let state = {}
   state.step           = 0
   state.selectedPkg    = state.selectedPkg    || null
   state.selectedSize   = state.selectedSize   || 'standard'
@@ -935,6 +933,11 @@
   }
 
   /* ===== WIZARD NAVIGATION ===== */
+  function scrollToWizard() {
+    const wiz = document.getElementById('bookingWizard')
+    if (wiz) window.scrollTo({ top: wiz.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' })
+  }
+
   document.getElementById('wizNext')?.addEventListener('click', async () => {
     if (!canAdvance()) return
     if (state.step === 3) {
@@ -943,11 +946,12 @@
       state.step++
       saveState()
       renderWizard()
+      scrollToWizard()
     }
   })
 
   document.getElementById('wizBack')?.addEventListener('click', () => {
-    if (state.step > 0) { state.step--; saveState(); renderWizard() }
+    if (state.step > 0) { state.step--; saveState(); renderWizard(); scrollToWizard() }
   })
 
   /* ===== INIT ===== */
